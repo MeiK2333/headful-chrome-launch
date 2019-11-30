@@ -72,7 +72,9 @@ RUN apt-get update && \
 
 RUN pip install mitmproxy
 
-COPY ./nginx.conf /etc/nginx/nginx.conf
-COPY . /app
+RUN apt-get -qq clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-CMD ["/bin/sh", "/app/start.sh"]
+COPY ./nginx.conf /etc/nginx/nginx.conf
+COPY . .
+
+CMD ["/bin/sh", "start.sh"]
