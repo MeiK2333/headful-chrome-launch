@@ -1,15 +1,30 @@
 import asyncio
 
 import websockets
+from aiohttp import web
 
 chrome_ws_set = set()
+
+routes = web.RouteTableDef()
+
+
+@routes.get("/json")
+@routes.get("/json/list")
+async def web_json_list(request):
+    # TODO
+    return []
+
+
+@routes.get("/avaliable")
+async def web_main(request):
+    return web.json_response(len(chrome_ws_set))
 
 
 async def register(websocket, path):
     chrome_ws_set.add(websocket)
     try:
         while True:
-            await asyncio.sleep(3)
+            await asyncio.sleep(1)
             await websocket.ping()
     finally:
         chrome_ws_set.remove(websocket)
@@ -47,4 +62,12 @@ if __name__ == "__main__":
 
     asyncio.get_event_loop().run_until_complete(register_server)
     asyncio.get_event_loop().run_until_complete(master_server)
+
+    web_app = web.Application()
+    web_app.add_routes(routes)
+    web_runner = web.AppRunner(web_app)
+    asyncio.get_event_loop().run_until_complete(web_runner.setup())
+    web_site = web.TCPSite(web_runner, port=6789)
+    asyncio.get_event_loop().run_until_complete(web_site.start())
+
     asyncio.get_event_loop().run_forever()
