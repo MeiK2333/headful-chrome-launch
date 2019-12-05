@@ -67,8 +67,7 @@ RUN apt-get update && \
     xfonts-scalable \
     xvfb
 
-RUN pip install mitmproxy && \
-    pip install websockets
+RUN pip install -i http://mirrors.aliyun.com/pypi/simple/ mitmproxy websockets
 
 RUN apt-get -qq clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
