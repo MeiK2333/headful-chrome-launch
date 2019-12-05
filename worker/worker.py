@@ -40,10 +40,10 @@ print(f"Chrome DevTools listening on: {CHROME_WS_URI}")
 
 async def worker():
     async with websockets.connect(
-        CHROME_WS_URI, ping_interval=None
+        CHROME_WS_URI, ping_interval=None, max_size=2 ** 30
     ) as chrome_websocket:
         async with websockets.connect(
-            MASTER_WS_URI, ping_interval=None
+            MASTER_WS_URI, ping_interval=None, max_size=2 ** 30
         ) as master_websocket:
             while True:
                 mws = master_websocket.recv()

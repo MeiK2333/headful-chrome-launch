@@ -42,8 +42,8 @@ async def master(websocket, path):
 
 
 if __name__ == "__main__":
-    register_server = websockets.serve(register, "0.0.0.0", 8765)
-    master_server = websockets.serve(master, "0.0.0.0", 5678)
+    register_server = websockets.serve(register, "0.0.0.0", 8765, max_size=2 ** 30)
+    master_server = websockets.serve(master, "0.0.0.0", 5678, max_size=2 ** 30)
 
     asyncio.get_event_loop().run_until_complete(register_server)
     asyncio.get_event_loop().run_until_complete(master_server)
