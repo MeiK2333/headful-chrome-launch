@@ -1,4 +1,5 @@
 import asyncio
+import os
 
 import websockets
 
@@ -6,7 +7,7 @@ from chrome import Chrome
 
 
 async def master(websocket, path):
-    chrome = Chrome()
+    chrome = Chrome(proxy=os.environ.get("proxy-server", None))
     await chrome.launch()
     async with websockets.connect(
         chrome.websockets, ping_interval=None, max_size=2 ** 30

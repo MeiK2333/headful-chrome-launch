@@ -1,0 +1,15 @@
+version: "2.0"
+services:
+  master:
+    build: .
+    environment:
+      proxy-server: http://proxy_server:8080
+      debug: "True"
+    ports:
+      - 5678:5678
+
+  proxy_server:
+    build: .
+    environment:
+      debug: "True"
+    command: /bin/sh proxy.sh

@@ -1,5 +1,4 @@
 import asyncio
-import atexit
 import errno
 import os
 import platform
@@ -10,6 +9,8 @@ import subprocess
 import uuid
 
 import websockets
+
+from logger import logger
 
 
 class Chrome:
@@ -39,6 +40,7 @@ class Chrome:
         self.popen = None
 
     async def launch(self) -> str:
+        logger.debug(f"launch chrome: {self.launch_args}")
         self.popen = subprocess.Popen(
             self.launch_args, stderr=subprocess.PIPE, preexec_fn=os.setsid
         )
@@ -55,6 +57,7 @@ class Chrome:
         return self.websockets
 
     async def kill(self):
+        logger.debug(f"kill chrome: {self.popen.pid}")
         os.killpg(os.getpgid(self.popen.pid), signal.SIGTERM)
         await asyncio.sleep(1)
         try:
