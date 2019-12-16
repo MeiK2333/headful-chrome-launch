@@ -74,3 +74,5 @@ RUN apt-get -qq clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 COPY . /app
 
 WORKDIR /app
+
+CMD ["python", "run.py"]
