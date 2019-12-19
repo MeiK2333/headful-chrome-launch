@@ -1,6 +1,8 @@
-from logger import logger
+from urllib.parse import urlparse
 
-from mitmproxy import http
+from mitmproxy import ctx, http
+
+from logger import logger
 
 
 def request(flow: http.HTTPFlow) -> None:
@@ -12,5 +14,12 @@ def request(flow: http.HTTPFlow) -> None:
             return
         logger.debug(f"use proxy {proxy}")
         del flow.request.headers["mitmproxy"]
-        host, port = proxy.split(":")
-        flow.live.change_upstream_proxy_server((host, int(port)))
+        parsed_proxy = urlparse(proxy)
+
+        host = parsed_proxy.hostname
+        port = parsed_proxy.port or 80
+        username = parsed_proxy.username
+        password = parsed_proxy.password
+        if username and password:
+            ctx.options.upstream_auth = f"{username}:{password}"
+        flow.live.change_upstream_proxy_server((host, port))
