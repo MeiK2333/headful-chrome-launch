@@ -1,5 +1,6 @@
 import asyncio
 import os
+from urllib.parse import parse_qs, urlparse
 
 import websockets
 
@@ -7,7 +8,10 @@ from chrome import Chrome
 
 
 async def master(websocket, path):
-    chrome = Chrome(proxy=os.environ.get("proxy-server", None))
+    params = parse_qs(urlparse(path).query)
+    if "--proxy-server" not in params.keys() and os.environ.get("proxy-server"):
+        params["--proxy-server"] = [os.environ["proxy-server"]]
+    chrome = Chrome(params=params)
     try:
         await chrome.launch()
         async with websockets.connect(

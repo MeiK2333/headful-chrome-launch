@@ -14,7 +14,7 @@ from logger import logger
 
 
 class Chrome:
-    def __init__(self, proxy=None):
+    def __init__(self, params=None):
         if platform.system() == "Darwin":
             self.launch_args = [
                 "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
@@ -34,8 +34,12 @@ class Chrome:
             "--disable-dev-shm-usage",
             "--window-size=1920,1080",
         ]
-        if proxy:
-            self.launch_args.append(f"--proxy-server={proxy}")
+        if params is None:
+            params = {}
+        self.params = params
+        for key in params.keys():
+            for value in params[key]:
+                self.launch_args.append(f"{key}={value}")
         self.websockets = None
         self.popen = None
 
@@ -44,6 +48,7 @@ class Chrome:
         self.popen = subprocess.Popen(
             self.launch_args, stderr=subprocess.PIPE, preexec_fn=os.setsid
         )
+        logger.debug(f"run chrome: {self.popen.pid}")
         try_times = 10
         while try_times != 0:
             if not self.popen.stderr.readable:
@@ -59,6 +64,7 @@ class Chrome:
     async def kill(self):
         logger.debug(f"kill chrome: {self.popen.pid}")
         os.killpg(os.getpgid(self.popen.pid), signal.SIGTERM)
+        self.popen.wait()
         await asyncio.sleep(1)
         try:
             shutil.rmtree(self.temp_filename)
