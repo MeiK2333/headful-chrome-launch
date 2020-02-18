@@ -69,10 +69,12 @@ RUN apt-get update && \
 
 RUN pip install -i https://mirrors.aliyun.com/pypi/simple/ mitmproxy websockets aiohttp
 
+RUN apt install dumb-init
+
 RUN apt-get -qq clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 COPY . /app
 
 WORKDIR /app
 
-CMD ["python", "run.py"]
+CMD ["/usr/bin/dumb-init", "--", "python", "run.py"]
