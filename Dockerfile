@@ -77,4 +77,4 @@ COPY . /app
 
 WORKDIR /app
 
-CMD ["/usr/bin/dumb-init", "--", "python", "run.py"]
+CMD ["./start.sh"]

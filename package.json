@@ -1,0 +1,25 @@
+{
+  "name": "headful-chrome-launch",
+  "version": "1.0.0",
+  "description": "## Run",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MeiK2333/headful-chrome-launch.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MeiK2333/headful-chrome-launch/issues"
+  },
+  "homepage": "https://github.com/MeiK2333/headful-chrome-launch#readme",
+  "dependencies": {
+    "@types/node": "^13.7.2",
+    "http-proxy": "^1.18.0",
+    "playwright": "^0.11.1"
+  }
+}
