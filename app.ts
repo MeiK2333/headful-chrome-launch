@@ -9,35 +9,46 @@ var proxyServer = http.createServer(function (req, res) {
 });
 
 proxyServer.on('upgrade', async (req, socket, head) => {
-  const browserType = req.url.split('/')[1].toLowerCase()
+  const browserType = req.url.split('/')[1].toLowerCase();
   var browser;
   switch (browserType) {
     case 'chrome':
-      console.log('Chrome');
-      browser = playwright.chromium;
+      // TODO: 使用 Chrome
+      browser = await playwright.chromium.launchServer({
+        headless: false
+      });
       break;
     case 'chromium':
-      console.log('Chromium');
-      browser = playwright.chromium;
+      browser = await playwright.chromium.launchServer({
+        headless: false
+      });
       break;
     case 'firefox':
-      console.log('Firefox');
-      browser = playwright.firefox;
+      browser = await playwright.firefox.launchServer({
+        headless: false
+      });
       break;
     case 'webkit':
-      console.log('Webkit');
-      browser = playwright.webkit;
+      browser = await playwright.webkit.launchServer({
+        headless: false
+      });
       break;
     default:
-      console.log('Chrome');
-      browser = playwright.chromium;
+      browser = await playwright.chromium.launchServer({
+        headless: false
+      });
   }
-  const runningBrowser = await browser.launchServer({
-    headless: false
+  console.log(`${browserType}: ${browser.wsEndpoint()}`);
+  socket.on('close', async () => {
+    await browser.close();
+    console.log(`${browserType}: ${browser.wsEndpoint()} closed`);
   });
-  console.log(runningBrowser.wsEndpoint());
+  socket.on('error', async () => {
+    await browser.close();
+    console.log(`${browserType}: ${browser.wsEndpoint()} error`);
+  });
   proxy.ws(req, socket, head, {
-    target: runningBrowser.wsEndpoint(),
+    target: browser.wsEndpoint(),
     ignorePath: true
   });
 });

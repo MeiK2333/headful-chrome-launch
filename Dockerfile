@@ -1,4 +1,4 @@
-FROM python:3.8.0-buster
+FROM node:13.8.0-buster
 
 COPY ./sources.list /etc/apt/
 
@@ -9,6 +9,7 @@ RUN cd /tmp && \
 RUN apt-get update && \
     apt-get install -yq \
     ca-certificates \
+    dumb-init \
     ffmpeg \
     fontconfig \
     fonts-indic \
@@ -53,7 +54,6 @@ RUN apt-get update && \
     libxtst6 \
     locales \
     lsb-release \
-    nginx \
     pdftk \
     unzip \
     wget \
@@ -67,14 +67,12 @@ RUN apt-get update && \
     xfonts-scalable \
     xvfb
 
-RUN pip install -i https://mirrors.aliyun.com/pypi/simple/ mitmproxy websockets aiohttp
-
-RUN apt install dumb-init
-
 RUN apt-get -qq clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 COPY . /app
 
 WORKDIR /app
+
+RUN npm install -g ts-node typescript && npm install
 
 CMD ["./start.sh"]

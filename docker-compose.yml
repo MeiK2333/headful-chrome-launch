@@ -9,7 +9,7 @@ services:
       - 5678:5678
 
   proxy_server:
-    build: .
+    build: proxy
     environment:
       debug: "True"
     command: /bin/sh proxy.sh

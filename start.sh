@@ -15,7 +15,7 @@ xvfb=$!
 
 export DISPLAY=:1
 
-/usr/bin/dumb-init -- python run.py $@ &
+/usr/bin/dumb-init -- ts-node app.ts $@ &
 node=$!
 
 wait $node
