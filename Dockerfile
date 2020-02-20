@@ -22,6 +22,7 @@ RUN apt-get update && \
     libappindicator1 \
     libappindicator3-1 \
     libasound2 \
+    libatk-bridge2.0-0 \
     libatk1.0-0 \
     libc6 \
     libcairo2 \
@@ -74,6 +75,6 @@ COPY . /app
 
 WORKDIR /app
 
-RUN npm install -g ts-node typescript && npm install
+RUN npm install -registry=https://registry.npm.taobao.org && npm install -g ts-node typescript -registry=https://registry.npm.taobao.org
 
 CMD ["./start.sh"]
