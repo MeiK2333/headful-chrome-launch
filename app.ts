@@ -15,12 +15,14 @@ proxyServer.on('upgrade', async (req, socket, head) => {
     case 'chrome':
       // TODO: 使用 Chrome
       browser = await playwright.chromium.launchServer({
-        headless: false
+        headless: false,
+        args: ['--disable-dev-shm-usage']
       });
       break;
     case 'chromium':
       browser = await playwright.chromium.launchServer({
-        headless: false
+        headless: false,
+        args: ['--disable-dev-shm-usage']
       });
       break;
     case 'firefox':
@@ -35,7 +37,8 @@ proxyServer.on('upgrade', async (req, socket, head) => {
       break;
     default:
       browser = await playwright.chromium.launchServer({
-        headless: false
+        headless: false,
+        args: ['--disable-dev-shm-usage']
       });
   }
   console.log(`${browserType}: ${browser.wsEndpoint()}`);
