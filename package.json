@@ -18,8 +18,9 @@
   },
   "homepage": "https://github.com/MeiK2333/headful-chrome-launch#readme",
   "dependencies": {
-    "@types/node": "^13.7.2",
+    "@types/node": "^13.7.4",
     "http-proxy": "^1.18.0",
-    "playwright": "^0.11.1"
+    "playwright": "^0.11.1",
+    "proxy-chain": "^0.4.1"
   }
 }

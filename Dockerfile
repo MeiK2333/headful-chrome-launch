@@ -57,6 +57,7 @@ RUN apt-get update && \
     locales \
     lsb-release \
     pdftk \
+    proxychains \
     unzip \
     wget \
     x11-apps \
@@ -75,6 +76,6 @@ COPY . /app
 
 WORKDIR /app
 
-RUN npm install -registry=https://registry.npm.taobao.org && npm install -g ts-node typescript -registry=https://registry.npm.taobao.org
+RUN cp proxychains.conf /etc/ && rm -rf node_modules && npm install -registry=https://registry.npm.taobao.org && npm install -g ts-node typescript -registry=https://registry.npm.taobao.org
 
 CMD ["./start.sh"]
