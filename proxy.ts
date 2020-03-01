@@ -13,9 +13,12 @@ const server = new proxyChain.Server({
         port,
         isHttp,
     }) => {
+        if (username) {
+            console.log(username, password);
+        }
         return {
             requestAuthentication: username === null,
-            upstreamProxyUrl: Buffer.from(username || '', 'base64').toString('ascii') === 'proxy'
+            upstreamProxyUrl: username === 'proxy'
                 ? Buffer.from(password || '', 'base64').toString('ascii')
                 : null
         }

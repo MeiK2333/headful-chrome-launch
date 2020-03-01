@@ -15,7 +15,7 @@ xvfb=$!
 
 export DISPLAY=:1
 
-/usr/bin/dumb-init -- ts-node app.ts $@ &
+/usr/bin/dumb-init -- proxychains ts-node app.ts $@ &
 node=$!
 
 wait $node

@@ -75,7 +75,6 @@ proxyServer.on('upgrade', async (req, socket, head) => {
       browser = await playwright.firefox.launchServer({
         headless: false
       });
-      console.log(browser.process().spawnargs);
       break;
     case 'webkit':
       browser = await playwright.webkit.launchServer({

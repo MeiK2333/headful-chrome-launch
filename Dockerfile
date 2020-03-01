@@ -9,6 +9,7 @@ RUN cd /tmp && \
 RUN apt-get update && \
     apt-get install -yq \
     ca-certificates \
+    curl \
     dumb-init \
     ffmpeg \
     fontconfig \
@@ -28,19 +29,34 @@ RUN apt-get update && \
     libcairo2 \
     libcups2 \
     libdbus-1-3 \
+    libdbus-glib-1-2 \
+    libegl1 \
+    libenchant1c2a \
+    libevent-2.1-6 \
     libexpat1 \
     libfontconfig1 \
     libgbm1 \
     libgcc1 \
     libgconf-2-4 \
     libgdk-pixbuf2.0-0 \
+    libgl1 \
+    libgles2 \
     libglib2.0-0 \
     libgtk-3-0 \
+    libgudev-1.0-0 \
+    libhyphen0 \
+    libnotify4 \
     libnspr4 \
     libnss3 \
+    libopus0 \
     libpango-1.0-0 \
     libpangocairo-1.0-0 \
+    libsecret-1-0 \
     libstdc++6 \
+    libvpx5 \
+    libwebp6 \
+    libwebpdemux2 \
+    libwoff1 \
     libx11-6 \
     libx11-xcb1 \
     libxcb1 \
@@ -52,7 +68,9 @@ RUN apt-get update && \
     libxi6 \
     libxrandr2 \
     libxrender1 \
+    libxslt1.1 \
     libxss1 \
+    libxt6 \
     libxtst6 \
     locales \
     lsb-release \
@@ -76,6 +94,10 @@ COPY . /app
 
 WORKDIR /app
 
-RUN cp proxychains.conf /etc/ && rm -rf node_modules && npm install -registry=https://registry.npm.taobao.org && npm install -g ts-node typescript -registry=https://registry.npm.taobao.org
+RUN cp proxychains.conf /etc/ && \
+    rm -rf node_modules package-lock.json && \
+    npm install playwright -registry=https://registry.npm.taobao.org && \
+    npm install -registry=https://registry.npm.taobao.org && \
+    npm install -g ts-node typescript -registry=https://registry.npm.taobao.org
 
 CMD ["./start.sh"]
