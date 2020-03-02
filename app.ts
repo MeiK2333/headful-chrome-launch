@@ -6,7 +6,25 @@ var http = require('http');
 var httpProxy = require('http-proxy');
 var playwright = require('playwright');
 
-// start proxy server
+// 启动代理服务
+// 使用方法
+/*
+const { chromium, firefox, webkit } = require('playwright');
+
+(async () => {
+  const browser = await firefox.connect({ wsEndpoint: 'ws://127.0.0.1:5678/firefox/' }); // Or 'webkit' or 'firefox'
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  await page.authenticate({
+    username: 'proxy',
+    password: 'http://ip:port'
+  });
+  await page.goto('https://httpbin.org/get');
+  await page.screenshot({ path: `example.png` });
+  await browser.close()
+})();
+
+*/
 require('./proxy');
 
 function promisify(nodeFunction: Function): Function {
@@ -25,16 +43,8 @@ function promisify(nodeFunction: Function): Function {
   return promisified;
 }
 
-const firefoxUserJs = `
-user_pref("security.tls.version.min", 1);
-user_pref("network.stricttransportsecurity.preloadlist", false);
-user_pref("network.proxy.type", 1);
-user_pref("network.proxy.share_proxy_settings", true);
-user_pref("network.proxy.http", "127.0.0.1");
-user_pref("network.proxy.http_port", 8080);
-user_pref("network.proxy.ssl", "127.0.0.1");
-user_pref("network.proxy.ssl_port", 8080);
-`;
+const mkdtempAsync = promisify(fs.mkdtemp);
+const writeFileAsync = promisify(fs.writeFile);
 
 var proxy = new httpProxy.createProxyServer();
 var proxyServer = http.createServer(function (req, res) {
@@ -72,11 +82,26 @@ proxyServer.on('upgrade', async (req, socket, head) => {
       });
       break;
     case 'firefox':
-      browser = await playwright.firefox.launchServer({
+      // 将代理配置写入 Firefox 的配置文件中，并以此配置文件启动
+      const firefoxUserJs = `
+user_pref("security.tls.version.min", 1);
+user_pref("network.stricttransportsecurity.preloadlist", false);
+user_pref("network.proxy.type", 1);
+user_pref("network.proxy.share_proxy_settings", true);
+user_pref("network.proxy.http", "127.0.0.1");
+user_pref("network.proxy.http_port", 8080);
+user_pref("network.proxy.ssl", "127.0.0.1");
+user_pref("network.proxy.ssl_port", 8080);
+      `;
+      const userDataDir = await mkdtempAsync(path.join(os.tmpdir(), 'playwright_dev_firefox_profile-'));
+      console.log(userDataDir);
+      await writeFileAsync(path.join(userDataDir, "./user.js"), firefoxUserJs);
+      browser = (await playwright.firefox._launchServer({
         headless: false
-      });
+      }, 'server', userDataDir)).browserServer;
       break;
     case 'webkit':
+      // TODO: 暂时无法启动
       browser = await playwright.webkit.launchServer({
         headless: false
       });

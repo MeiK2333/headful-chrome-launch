@@ -93,7 +93,7 @@ COPY . /app
 
 WORKDIR /app
 
-RUN rm -rf node_modules package-lock.json && \
+RUN rm -rf node_modules && \
     npm install -registry=https://registry.npm.taobao.org && \
     npm install -g ts-node typescript -registry=https://registry.npm.taobao.org
 
