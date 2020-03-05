@@ -25,7 +25,9 @@ const server = new proxyChain.Server({
       'ocsp.digicert.com',
       'ocsp.sca1b.amazontrust.com',
       'tracking-protection.cdn.mozilla.net',
-      'search.services.mozilla.com'
+      'search.services.mozilla.com',
+      'ocsp.godaddy.com',
+      'mozilla.org'
     ]
     const filter = filterUrls.some((urlPart) => hostname.includes(urlPart));
     if (filter) {

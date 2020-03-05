@@ -94,7 +94,6 @@ user_pref("network.proxy.ssl", "127.0.0.1");
 user_pref("network.proxy.ssl_port", 8080);
       `;
       const userDataDir = await mkdtempAsync(path.join(os.tmpdir(), 'playwright_dev_firefox_profile-'));
-      console.log(userDataDir);
       await writeFileAsync(path.join(userDataDir, "./user.js"), firefoxUserJs);
       browser = (await playwright.firefox._launchServer({
         headless: false
