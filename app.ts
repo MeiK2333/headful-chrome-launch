@@ -57,11 +57,12 @@ proxyServer.on('upgrade', async (req, socket, head) => {
   var browser;
   switch (browserType) {
     case 'chrome':
-      // TODO: 使用 Chrome
       browser = await playwright.chromium.launchServer({
+        executablePath: '/usr/bin/google-chrome',
         headless: false,
         args: [
           '--disable-dev-shm-usage',
+          '--disable-setuid-sandbox',
           '--no-sandbox',
           '--proxy-server=http://127.0.0.1:8080',
           '--no-first-run',
@@ -74,6 +75,7 @@ proxyServer.on('upgrade', async (req, socket, head) => {
         headless: false,
         args: [
           '--disable-dev-shm-usage',
+          '--disable-setuid-sandbox',
           '--no-sandbox',
           '--proxy-server=http://127.0.0.1:8080',
           '--no-first-run',
@@ -106,6 +108,8 @@ user_pref("network.proxy.ssl_port", 8080);
       });
       break;
     default:
+      console.log(`Unknown browser: ${browserType}`);
+      socket.end();
       return;
   }
   console.log(`${browserType}: ${browser.wsEndpoint()}`);
