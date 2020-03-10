@@ -102,12 +102,12 @@ user_pref("network.proxy.ssl_port", 8080);
           headless: false
         }, 'server', userDataDir)).browserServer;
         break;
-      case 'webkit':
-        // TODO: 暂时无法启动
-        browser = await playwright.webkit.launchServer({
-          headless: false
-        });
-        break;
+      // case 'webkit':
+      //   // TODO: 暂时无法启动
+      //   browser = await playwright.webkit.launchServer({
+      //     headless: false
+      //   });
+      //   break;
       default:
         console.log(`Unknown browser: ${browserType}`);
         socket.end();
