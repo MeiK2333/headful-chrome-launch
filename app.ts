@@ -1,10 +1,11 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
+import * as playwright from 'playwright';
+import { Args } from './args';
 
 var http = require('http');
 var httpProxy = require('http-proxy');
-var playwright = require('playwright');
 
 // 启动代理服务
 // 使用方法
@@ -54,9 +55,9 @@ var proxyServer = http.createServer(function (req, res) {
 
 proxyServer.on('upgrade', async (req, socket, head) => {
   try {
-    const browserType = req.url.split('/')[1].toLowerCase();
-    var browser;
-    switch (browserType) {
+    const args = Args.parseFromReq(req);
+    var browser: playwright.BrowserServer;
+    switch (args.browserType) {
       case 'chrome':
         browser = await playwright.chromium.launchServer({
           executablePath: '/usr/bin/google-chrome',
@@ -98,6 +99,7 @@ user_pref("network.proxy.ssl_port", 8080);
       `;
         const userDataDir = await mkdtempAsync(path.join(os.tmpdir(), 'playwright_dev_firefox_profile-'));
         await writeFileAsync(path.join(userDataDir, "./user.js"), firefoxUserJs);
+        //@ts-ignore
         browser = (await playwright.firefox._launchServer({
           headless: false
         }, 'server', userDataDir)).browserServer;
@@ -109,18 +111,32 @@ user_pref("network.proxy.ssl_port", 8080);
       //   });
       //   break;
       default:
-        console.log(`Unknown browser: ${browserType}`);
+        console.log(`Unknown browser: ${args.browserType}`);
         socket.end();
         return;
     }
-    console.log(`${browserType}: ${browser.wsEndpoint()}`);
-    socket.on('close', async () => {
+
+    var timer: NodeJS.Timeout;
+    if (args.timeout) {
+      timer = setTimeout(async () => {
+        await closeBrowser();
+        console.log(`Timeout! ${args.browserType}: ${browser.wsEndpoint()} closed`);
+      }, args.timeout);
+    }
+    const closeBrowser = async () => {
+      clearTimeout(timer);
       await browser.close();
-      console.log(`${browserType}: ${browser.wsEndpoint()} closed`);
+      socket.end();
+    }
+
+    console.log(`${args.browserType}: ${browser.wsEndpoint()}`);
+    socket.on('close', async () => {
+      await closeBrowser();
+      console.log(`${args.browserType}: ${browser.wsEndpoint()} closed`);
     });
     socket.on('error', async () => {
-      await browser.close();
-      console.log(`${browserType}: ${browser.wsEndpoint()} error`);
+      await closeBrowser();
+      console.log(`${args.browserType}: ${browser.wsEndpoint()} error`);
     });
     proxy.ws(req, socket, head, {
       target: browser.wsEndpoint(),
