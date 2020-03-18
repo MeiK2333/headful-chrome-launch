@@ -57,6 +57,8 @@ proxyServer.on('upgrade', async (req, socket, head) => {
   try {
     const args = Args.parseFromReq(req);
     var browser: playwright.BrowserServer;
+    let userDataDir: string = null;
+
     switch (args.browserType) {
       case 'chrome':
         browser = await playwright.chromium.launchServer({
@@ -97,7 +99,7 @@ user_pref("network.proxy.http_port", 8080);
 user_pref("network.proxy.ssl", "127.0.0.1");
 user_pref("network.proxy.ssl_port", 8080);
       `;
-        const userDataDir = await mkdtempAsync(path.join(os.tmpdir(), 'playwright_dev_firefox_profile-'));
+        userDataDir = await mkdtempAsync(path.join(os.tmpdir(), 'playwright_dev_firefox_profile-'));
         await writeFileAsync(path.join(userDataDir, "./user.js"), firefoxUserJs);
         //@ts-ignore
         browser = (await playwright.firefox._launchServer({
@@ -126,6 +128,10 @@ user_pref("network.proxy.ssl_port", 8080);
     const closeBrowser = async () => {
       clearTimeout(timer);
       await browser.close();
+      // 如果创建了临时文件夹，则应该在浏览器关闭时删除
+      if (userDataDir) {
+        await fs.promises.rmdir(userDataDir, { recursive: true });
+      }
       socket.end();
     }
 
