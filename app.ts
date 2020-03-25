@@ -102,9 +102,9 @@ user_pref("network.proxy.ssl_port", 8080);
         userDataDir = await mkdtempAsync(path.join(os.tmpdir(), 'playwright_dev_firefox_profile-'));
         await writeFileAsync(path.join(userDataDir, "./user.js"), firefoxUserJs);
         //@ts-ignore
-        browser = (await playwright.firefox._launchServer({
+        browser = await playwright.firefox._launchServer({
           headless: false
-        }, 'server', userDataDir)).browserServer;
+        }, 'server', userDataDir);
         break;
       // case 'webkit':
       //   // TODO: 暂时无法启动
