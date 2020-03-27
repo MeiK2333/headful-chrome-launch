@@ -1,4 +1,4 @@
-version: "2.0"
+version: "2.1"
 services:
   master:
     image: 'meik2333/headful-chrome-launch:latest'
