@@ -32,6 +32,10 @@ export class Args {
     args.query = querystring.parse(parsedURL.query);
     if (args.query['timeout']) {
       args.timeout = Number(args.query['timeout']);
+      // timeout 最小为一分钟
+      if (args.timeout < 60 * 1000) {
+        args.timeout = 60 * 1000;
+      }
     }
     return args;
   }
