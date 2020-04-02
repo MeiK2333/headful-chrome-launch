@@ -5,9 +5,3 @@ services:
     ports:
       - 5678:5678
     shm_size: "2gb"
-    sysctls:
-      - net.ipv4.tcp_syncookies=1
-      - net.ipv4.tcp_fin_timeout=20
-      - net.ipv4.tcp_max_tw_buckets=512
-      - net.ipv4.ip_local_port_range=10000 65000
-      - net.ipv4.tcp_keepalive_time=300
