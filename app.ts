@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
+import * as url from 'url';
 import * as playwright from 'playwright';
 import { Args } from './args';
 
@@ -68,7 +69,7 @@ proxyServer.on('upgrade', async (req, socket, head) => {
             '--disable-dev-shm-usage',
             '--disable-setuid-sandbox',
             '--no-sandbox',
-            '--proxy-server=http://127.0.0.1:8080',
+            `--proxy-server=${args.proxyServer}`,
             '--no-first-run',
             '--no-default-browser-check'
           ]
@@ -81,7 +82,7 @@ proxyServer.on('upgrade', async (req, socket, head) => {
             '--disable-dev-shm-usage',
             '--disable-setuid-sandbox',
             '--no-sandbox',
-            '--proxy-server=http://127.0.0.1:8080',
+            `--proxy-server=${args.proxyServer}`,
             '--no-first-run',
             '--no-default-browser-check'
           ]
@@ -89,15 +90,17 @@ proxyServer.on('upgrade', async (req, socket, head) => {
         break;
       case 'firefox':
         // 将代理配置写入 Firefox 的配置文件中，并以此配置文件启动
+        const proxyServerUrl = url.parse(args.proxyServer);
         const firefoxUserJs = `
+user_pref("security.cert_pinning.enforcement_level", 0);
 user_pref("security.tls.version.min", 1);
 user_pref("network.stricttransportsecurity.preloadlist", false);
 user_pref("network.proxy.type", 1);
 user_pref("network.proxy.share_proxy_settings", true);
-user_pref("network.proxy.http", "127.0.0.1");
-user_pref("network.proxy.http_port", 8080);
-user_pref("network.proxy.ssl", "127.0.0.1");
-user_pref("network.proxy.ssl_port", 8080);
+user_pref("network.proxy.http", "${proxyServerUrl.hostname}");
+user_pref("network.proxy.http_port", ${proxyServerUrl.port});
+user_pref("network.proxy.ssl", "${proxyServerUrl.hostname}");
+user_pref("network.proxy.ssl_port", ${proxyServerUrl.port});
       `;
         userDataDir = await mkdtempAsync(path.join(os.tmpdir(), 'playwright_dev_firefox_profile-'));
         await writeFileAsync(path.join(userDataDir, "./user.js"), firefoxUserJs);
@@ -123,7 +126,7 @@ user_pref("network.proxy.ssl_port", 8080);
       timer = setTimeout(async () => {
         await closeBrowser();
         console.log(`Timeout! ${args.browserType}: ${browser.wsEndpoint()} closed`);
-      }, args.timeout);
+      }, args.timeout * 1000 * 60);
     }
     const closeBrowser = async () => {
       clearTimeout(timer);

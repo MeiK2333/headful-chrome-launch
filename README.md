@@ -9,6 +9,8 @@ docker run --rm -it -p 5678:5678 meik2333/headful-chrome-launch
 
 ## Example
 
+### Dynamic proxy
+
 ```javascript
 const { chromium, firefox, webkit } = require('playwright');
 (async () => {
@@ -19,6 +21,20 @@ const { chromium, firefox, webkit } = require('playwright');
         password: 'http://ip:port'
       }
   });
+  const page = await context.newPage();
+  await page.goto('https://httpbin.org/get');
+  await page.screenshot({ path: `example.png` });
+  await browser.close()
+})();
+```
+
+### Static proxy
+
+```javascript
+const { chromium, firefox, webkit } = require('playwright');
+(async () => {
+  const browser = await firefox.connect({ wsEndpoint: 'ws://127.0.0.1:5678/firefox/?proxyServer=http://ip:port' });
+  const context = await browser.newContext();
   const page = await context.newPage();
   await page.goto('https://httpbin.org/get');
   await page.screenshot({ path: `example.png` });

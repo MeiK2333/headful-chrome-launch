@@ -14,6 +14,7 @@ export class Args {
   query: Object;
   browserType: browserTypeEnum;
   timeout?: number;
+  proxyServer: string;
   browserArgs?: Array<string>;
 
   constructor() {
@@ -31,12 +32,11 @@ export class Args {
     }
     args.query = querystring.parse(parsedURL.query);
     if (args.query['timeout']) {
+      // timeout 以分钟为单位
       args.timeout = Number(args.query['timeout']);
-      // timeout 最小为一分钟
-      if (args.timeout < 60 * 1000) {
-        args.timeout = 60 * 1000;
-      }
     }
+    args.proxyServer = args.query['proxyServer'] ? args.query['proxyServer'] : 'http://127.0.0.1:8080';
+    const psu = url.parse(args.proxyServer);
     return args;
   }
 };
