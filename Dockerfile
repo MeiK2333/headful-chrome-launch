@@ -89,12 +89,17 @@ RUN apt-get update && \
 
 RUN apt-get -qq clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-COPY . /app
+RUN mkdir /app
 
 WORKDIR /app
 
-RUN rm -rf node_modules && \
-    npm install -registry=https://registry.npm.taobao.org && \
+COPY ./package.json /app
+
+RUN npm install -registry=https://registry.npm.taobao.org && \
     npm install -g ts-node typescript -registry=https://registry.npm.taobao.org
+
+COPY ./src /app
+
+COPY ./start.sh /app
 
 CMD ["./start.sh"]

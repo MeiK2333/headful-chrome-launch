@@ -36,7 +36,6 @@ export class Args {
       args.timeout = Number(args.query['timeout']);
     }
     args.proxyServer = args.query['proxyServer'] ? args.query['proxyServer'] : 'http://127.0.0.1:8080';
-    const psu = url.parse(args.proxyServer);
     return args;
   }
 };

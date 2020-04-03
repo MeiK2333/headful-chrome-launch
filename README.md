@@ -2,6 +2,14 @@
 
 ## Run
 
+### Dev
+
+```bash
+ts-node src/app.ts
+```
+
+### Docker
+
 ```bash
 docker pull meik2333/headful-chrome-launch
 docker run --rm -it -p 5678:5678 meik2333/headful-chrome-launch
