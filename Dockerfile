@@ -1,13 +1,45 @@
-FROM node:13.8.0-buster
+FROM ubuntu:bionic
 
-COPY ./sources.list /etc/apt/
+# Copy from https://github.com/microsoft/playwright/blob/master/docs/docker/Dockerfile.bionic
+# Install node12
+RUN apt-get update && apt-get install -y curl && \
+    curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
+    apt-get install -y nodejs
 
-RUN cd /tmp && \
-    wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add -  && \
-    sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
+# Install WebKit dependencies
+RUN apt-get install -y libwoff1 \
+                       libopus0 \
+                       libwebp6 \
+                       libwebpdemux2 \
+                       libenchant1c2a \
+                       libgudev-1.0-0 \
+                       libsecret-1-0 \
+                       libhyphen0 \
+                       libgdk-pixbuf2.0-0 \
+                       libegl1 \
+                       libnotify4 \
+                       libxslt1.1 \
+                       libevent-2.1-6 \
+                       libgles2 \
+                       libvpx5
 
-RUN apt-get update && \
-    apt-get install -yq \
+# Install Chromium dependencies
+RUN apt-get install -y libnss3 \
+                       libxss1 \
+                       libasound2
+
+# Install Firefox dependencies
+RUN apt-get install -y libdbus-glib-1-2
+
+# Add user so we don't need --no-sandbox in Chromium
+RUN groupadd -r pwuser && useradd -r -g pwuser -G audio,video pwuser \
+    && mkdir -p /home/pwuser/Downloads \
+    && chown -R pwuser:pwuser /home/pwuser
+
+# Install front and others
+ENV TZ=America/New_York
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get install -yq \
     ca-certificates \
     curl \
     dumb-init \
@@ -19,44 +51,26 @@ RUN apt-get update && \
     fonts-noto-color-emoji \
     fonts-thai-tlwg \
     gconf-service \
-    google-chrome-stable \
     libappindicator1 \
     libappindicator3-1 \
-    libasound2 \
     libatk-bridge2.0-0 \
     libatk1.0-0 \
     libc6 \
     libcairo2 \
     libcups2 \
     libdbus-1-3 \
-    libdbus-glib-1-2 \
-    libegl1 \
-    libenchant1c2a \
-    libevent-2.1-6 \
     libexpat1 \
     libfontconfig1 \
     libgbm1 \
     libgcc1 \
     libgconf-2-4 \
-    libgdk-pixbuf2.0-0 \
     libgl1 \
-    libgles2 \
     libglib2.0-0 \
     libgtk-3-0 \
-    libgudev-1.0-0 \
-    libhyphen0 \
-    libnotify4 \
     libnspr4 \
-    libnss3 \
-    libopus0 \
     libpango-1.0-0 \
     libpangocairo-1.0-0 \
-    libsecret-1-0 \
     libstdc++6 \
-    libvpx5 \
-    libwebp6 \
-    libwebpdemux2 \
-    libwoff1 \
     libx11-6 \
     libx11-xcb1 \
     libxcb1 \
@@ -68,13 +82,10 @@ RUN apt-get update && \
     libxi6 \
     libxrandr2 \
     libxrender1 \
-    libxslt1.1 \
-    libxss1 \
     libxt6 \
     libxtst6 \
     locales \
     lsb-release \
-    pdftk \
     unzip \
     wget \
     x11-apps \
@@ -87,6 +98,13 @@ RUN apt-get update && \
     xfonts-scalable \
     xvfb
 
+# Download Chrome
+RUN cd /tmp && \
+    wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - && \
+    sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list' && \
+    apt-get update && \
+    apt-get install -yq google-chrome-stable
+
 RUN apt-get -qq clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN mkdir /app
@@ -95,11 +113,16 @@ WORKDIR /app
 
 COPY ./package.json /app
 
-RUN npm install -registry=https://registry.npm.taobao.org && \
-    npm install -g ts-node typescript -registry=https://registry.npm.taobao.org
+RUN npm install && \
+    npm install -g ts-node typescript
 
-COPY ./src /app
+COPY ./src /app/src
 
 COPY ./start.sh /app
+
+RUN chown -R pwuser:pwuser /app
+
+# Run everything after as non-privileged user.
+USER pwuser
 
 CMD ["./start.sh"]
