@@ -92,9 +92,15 @@ user_pref("network.proxy.ssl_port", ${proxyServerUrl.port});
         }, 'server', userDataDir);
         break;
       case 'webkit':
-        // TODO: Set proxy
         browser = await playwright.webkit.launchServer({
-          headless: false
+          headless: false,
+          env: {
+            ...process.env,
+            http_proxy: args.proxyServer,
+            https_proxy: args.proxyServer,
+            ftp_proxy: args.proxyServer,
+            all_proxy: args.proxyServer
+          }
         });
         break;
       default:
