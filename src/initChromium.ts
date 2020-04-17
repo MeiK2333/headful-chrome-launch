@@ -1,10 +1,15 @@
 import * as playwright from 'playwright';
+import * as fs from 'fs-extra';
 import * as extensions from './extensions';
 
 (async () => {
+  const access = fs.createWriteStream('/dev/null');
+  process.stdout.write = process.stderr.write = access.write.bind(access);
   const userDataDir = './extensions/chromium/defaultChromium';
-  //@ts-ignore
-  const browser = (await playwright.chromium._launchServer({
+  if (fs.existsSync(userDataDir)) {
+    fs.rmdirSync(userDataDir, { recursive: true });
+  }
+  const browser = await playwright.chromium.launchPersistentContext(userDataDir, {
     headless: false,
     args: [
       '--disable-dev-shm-usage',
@@ -15,7 +20,7 @@ import * as extensions from './extensions';
       `--disable-extensions-except=${extensions.extensions.join(',')}`,
       `--load-extensions=${extensions.extensions.join(',')}`
     ]
-  }, 'server', userDataDir)).browserServer;
+  });
   await extensions.chromiumUseExtension(browser);
   await browser.close();
 })();

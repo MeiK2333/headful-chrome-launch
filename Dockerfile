@@ -1,6 +1,6 @@
 FROM ubuntu:bionic
 
-ENV TZ=America/New_York
+ENV TZ=Asia/Shanghai
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Copy from https://github.com/microsoft/playwright/blob/master/docs/docker/Dockerfile.bionic
