@@ -18,7 +18,9 @@
   },
   "homepage": "https://github.com/MeiK2333/headful-chrome-launch#readme",
   "dependencies": {
+    "@types/fs-extra": "^8.1.0",
     "@types/node": "^13.7.4",
+    "fs-extra": "^9.0.0",
     "http-proxy": "^1.18.0",
     "playwright": "^0.12.1",
     "proxy-chain": "^0.4.3"

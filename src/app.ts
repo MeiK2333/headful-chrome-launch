@@ -1,9 +1,10 @@
-import * as fs from 'fs';
+import * as fs from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 import * as url from 'url';
 import * as playwright from 'playwright';
 import { Args } from './args';
+import * as extensions from './extensions';
 
 var http = require('http');
 var httpProxy = require('http-proxy');
@@ -58,7 +59,10 @@ proxyServer.on('upgrade', async (req, socket, head) => {
         });
         break;
       case 'chromium':
-        browser = await playwright.chromium.launchServer({
+        userDataDir = await mkdtempAsync(path.join(os.tmpdir(), 'playwright_dev_chromium_profile-'));
+        await fs.copy('./extensions/chromium/defaultChromium', userDataDir);
+        //@ts-ignore
+        browser = (await playwright.chromium._launchServer({
           headless: false,
           args: [
             '--disable-dev-shm-usage',
@@ -66,9 +70,11 @@ proxyServer.on('upgrade', async (req, socket, head) => {
             '--no-sandbox',
             `--proxy-server=${args.proxyServer}`,
             '--no-first-run',
-            '--no-default-browser-check'
+            '--no-default-browser-check',
+            `--disable-extensions-except=${extensions.extensions.join(',')}`,
+            `--load-extensions=${extensions.extensions.join(',')}`
           ]
-        });
+        }, 'server', userDataDir)).browserServer;
         break;
       case 'firefox':
         // 将代理配置写入 Firefox 的配置文件中，并以此配置文件启动

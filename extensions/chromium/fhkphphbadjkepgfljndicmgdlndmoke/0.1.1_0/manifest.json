@@ -1,0 +1,38 @@
+{
+   "background": {
+      "page": "lib/chrome/background.html"
+   },
+   "browser_action": {
+      "default_icon": {
+         "16": "data/icons/16.png",
+         "32": "data/icons/32.png",
+         "48": "data/icons/48.png",
+         "64": "data/icons/64.png"
+      },
+      "default_popup": "data/popup/popup.html",
+      "default_title": "Font Fingerprint Defender"
+   },
+   "content_scripts": [ {
+      "all_frames": true,
+      "js": [ "data/content_script/inject.js" ],
+      "match_about_blank": true,
+      "matches": [ "*://*/*" ],
+      "run_at": "document_start"
+   } ],
+   "description": "Defending against Font fingerprinting by reporting a fake value.",
+   "homepage_url": "https://mybrowseraddon.com/font-defender.html",
+   "icons": {
+      "128": "data/icons/128.png",
+      "16": "data/icons/16.png",
+      "32": "data/icons/32.png",
+      "48": "data/icons/48.png",
+      "64": "data/icons/64.png"
+   },
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsJk26vKc1/vZ50a6OLuJRZcfEGcxO6YaQUC6zqqfNdhSIFVFf2CSWfY55LAO5HKQA3zSUfMKi0xGLmVoFRsApbKHEi+GrLfCYIkUxGoTjuXXvetEI8tArH/6eMW0li81lOiMwakng8HrWCmXojNftKVqOmFb7QKcTsTK7qc357ViZec3I6znYICnzVUfoazt9T0/Ao6KwEZbM8hPQKKALWZuYDU7rqzAOxkfSbIQWHdkQF5vpXWUiwzNAwv2AabHQEiSlIJtdQ5RvkvM2alwY69toOKms4RNf8zh4+8Jp4I1kLLP6XfvsKshQcQflqp5lEN1vAIvyaRYcQl6RUzZ/QIDAQAB",
+   "manifest_version": 2,
+   "name": "Font Fingerprint Defender",
+   "permissions": [ "storage", "contextMenus", "notifications" ],
+   "short_name": "font-defender",
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "0.1.1"
+}
