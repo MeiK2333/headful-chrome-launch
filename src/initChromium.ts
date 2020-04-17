@@ -2,7 +2,7 @@ import * as playwright from 'playwright';
 import * as extensions from './extensions';
 
 (async () => {
-  const userDataDir = '/app/src/extensions/chromium/defaultChromium';
+  const userDataDir = './extensions/chromium/defaultChromium';
   //@ts-ignore
   const browser = (await playwright.chromium._launchServer({
     headless: false,

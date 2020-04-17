@@ -1,5 +1,8 @@
 FROM ubuntu:bionic
 
+ENV TZ=America/New_York
+ENV DEBIAN_FRONTEND=noninteractive
+
 # Copy from https://github.com/microsoft/playwright/blob/master/docs/docker/Dockerfile.bionic
 # Install node12
 RUN apt-get update && apt-get install -y curl && \
@@ -37,8 +40,6 @@ RUN groupadd -r pwuser && useradd -r -g pwuser -G audio,video pwuser \
     && chown -R pwuser:pwuser /home/pwuser
 
 # Install front and others
-ENV TZ=America/New_York
-ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get install -yq \
     ca-certificates \
     curl \
@@ -121,8 +122,6 @@ COPY ./src /app/src
 COPY ./extensions /app/extensions
 
 COPY ./start.sh /app
-
-RUN xvfb-run ts-node /app/src/initChromium.ts
 
 RUN chown -R pwuser:pwuser /app
 

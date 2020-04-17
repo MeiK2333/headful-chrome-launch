@@ -15,6 +15,7 @@ xvfb=$!
 
 export DISPLAY=:1
 
+/usr/bin/dumb-init -- ts-node src/initChromium.ts
 /usr/bin/dumb-init -- ts-node src/app.ts $@ &
 node=$!
 

@@ -1,12 +1,12 @@
 import * as playwright from 'playwright';
 
 export const extensions = [
-  '/app/src/extensions/chromium/fhkphphbadjkepgfljndicmgdlndmoke/0.1.1_0',
-  '/app/src/extensions/chromium/fjkmabmdepjfammlpliljpnbhleegehm/0.2.6_0',
-  '/app/src/extensions/chromium/lanfdkkpgfjfdikkncbnojekcppdebfp/0.1.6_0',
-  '/app/src/extensions/chromium/olnbjpaejebpnokblkepbphhembdicik/0.1.3_0',
-  '/app/src/extensions/chromium/pcbjiidheaempljdefbdplebgdgpjcbe/0.1.4_0',
-  '/app/src/extensions/chromium/pkehgijcmpdhfbdbbnkijodmdjhbjlgp/2020.2.19_0',
+  './extensions/chromium/fhkphphbadjkepgfljndicmgdlndmoke/0.1.1_0',
+  './extensions/chromium/fjkmabmdepjfammlpliljpnbhleegehm/0.2.6_0',
+  './extensions/chromium/lanfdkkpgfjfdikkncbnojekcppdebfp/0.1.6_0',
+  './extensions/chromium/olnbjpaejebpnokblkepbphhembdicik/0.1.3_0',
+  './extensions/chromium/pcbjiidheaempljdefbdplebgdgpjcbe/0.1.4_0',
+  './extensions/chromium/pkehgijcmpdhfbdbbnkijodmdjhbjlgp/2020.2.19_0',
 ];
 
 export async function chromiumUseExtension(browserServer: playwright.BrowserServer) {
@@ -33,7 +33,7 @@ export async function chromiumUseExtension(browserServer: playwright.BrowserServ
         return;
       }
     }
-    await page.click(`css=body > extensions-manager >> css=#items-list >> css=#${extensions[i].split('/')[5]} >> css=#detailsButton`);
+    await page.click(`css=body > extensions-manager >> css=#items-list >> css=#${extensions[i].split('/')[3]} >> css=#detailsButton`);
     await page.click('css=body > extensions-manager >> css=#viewManager > extensions-detail-view >> css=#allow-incognito');
   }
 };
