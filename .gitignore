@@ -168,4 +168,4 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-defaultChromium/
+.DS_Store
