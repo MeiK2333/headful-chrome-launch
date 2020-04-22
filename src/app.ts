@@ -71,8 +71,8 @@ proxyServer.on('upgrade', async (req, socket, head) => {
             `--proxy-server=${args.proxyServer}`,
             '--no-first-run',
             '--no-default-browser-check',
-            `--disable-extensions-except=${extensions.extensions.join(',')}`,
-            `--load-extensions=${extensions.extensions.join(',')}`
+            `--disable-extensions-except=${Object.values(extensions.extensions).join(',')}`,
+            `--load-extensions=${Object.values(extensions.extensions).join(',')}`
           ]
         }, 'server', userDataDir)).browserServer;
         break;

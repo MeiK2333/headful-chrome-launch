@@ -1,6 +1,6 @@
 FROM ubuntu:bionic
 
-ENV TZ=Asia/Shanghai
+ENV TZ=America/New_York
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Copy from https://github.com/microsoft/playwright/blob/master/docs/docker/Dockerfile.bionic
@@ -102,7 +102,7 @@ RUN apt-get install -yq \
 # Download Chrome
 RUN cd /tmp && \
     wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - && \
-    sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list' && \
+    sh -c 'echo "deb [arch=amd64] https://dl-ssl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list' && \
     apt-get update && \
     apt-get install -yq google-chrome-stable
 
@@ -123,9 +123,13 @@ COPY ./extensions /app/extensions
 
 COPY ./start.sh /app
 
+COPY ./init.sh /app
+
 RUN chown -R pwuser:pwuser /app
 
 # Run everything after as non-privileged user.
 USER pwuser
+
+RUN ./init.sh
 
 CMD ["./start.sh"]
