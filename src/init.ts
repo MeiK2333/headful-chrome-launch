@@ -3,8 +3,8 @@ import * as fs from 'fs-extra';
 import * as extensions from './extensions';
 
 (async () => {
-  const access = fs.createWriteStream('/dev/null');
-  process.stdout.write = process.stderr.write = access.write.bind(access);
+  // const access = fs.createWriteStream('/dev/null');
+  // process.stdout.write = process.stderr.write = access.write.bind(access);
   const userDataDir = './extensions/chromium/defaultChromium';
   if (fs.existsSync(userDataDir)) {
     fs.rmdirSync(userDataDir, { recursive: true });
