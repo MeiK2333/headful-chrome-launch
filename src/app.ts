@@ -71,9 +71,14 @@ proxyServer.on('upgrade', async (req, socket, head) => {
             `--proxy-server=${args.proxyServer}`,
             '--no-first-run',
             '--no-default-browser-check',
+            '--lang=zh-CN',
             `--disable-extensions-except=${Object.values(extensions.extensions).join(',')}`,
             `--load-extensions=${Object.values(extensions.extensions).join(',')}`
-          ]
+          ],
+          env: {
+            ...process.env,
+            LANGUAGE: 'zh-CN'
+          }
         }, 'server', userDataDir)).browserServer;
         break;
       case 'firefox':

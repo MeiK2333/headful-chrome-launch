@@ -17,9 +17,14 @@ import * as extensions from './extensions';
       '--no-sandbox',
       '--no-first-run',
       '--no-default-browser-check',
+      '--lang=zh-CN',
       `--disable-extensions-except=${Object.values(extensions.extensions).join(',')}`,
       `--load-extensions=${Object.values(extensions.extensions).join(',')}`
-    ]
+    ],
+    env: {
+      ...process.env,
+      LANGUAGE: 'zh-CN'
+    }
   });
   await chromiumUseExtension(browser);
   await browser.close();
