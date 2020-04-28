@@ -9,3 +9,4 @@ services:
     memswap_limit: "4gb"
     cpu_count: 2
     cpu_percent: 50
+    restart: always
