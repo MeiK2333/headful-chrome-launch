@@ -18,11 +18,19 @@
   },
   "homepage": "https://github.com/MeiK2333/headful-chrome-launch#readme",
   "dependencies": {
+    "@types/cookies": "^0.7.4",
     "@types/fs-extra": "^8.1.0",
+    "@types/http-proxy": "^1.17.4",
     "@types/node": "^13.7.4",
+    "axios": "^0.19.2",
+    "cookies": "^0.8.0",
     "fs-extra": "^9.0.0",
     "http-proxy": "^1.18.0",
+    "i": "^0.3.6",
+    "moment": "^2.24.0",
+    "npm": "^6.14.4",
     "playwright": "^0.12.1",
-    "proxy-chain": "^0.4.3"
+    "proxy-chain": "^0.4.3",
+    "winston": "^3.2.1"
   }
 }

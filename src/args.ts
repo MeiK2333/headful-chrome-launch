@@ -1,8 +1,8 @@
-import * as http from 'http';
-import * as url from 'url';
-import * as querystring from 'querystring';
+import http from 'http';
+import url from 'url';
+import querystring from 'querystring';
 
-export enum browserTypeEnum {
+export enum BrowserTypeEnum {
   firefox = 'firefox',
   chrome = 'chrome',
   chromium = 'chromium',
@@ -12,7 +12,7 @@ export enum browserTypeEnum {
 export class Args {
   url: string;
   query: Object;
-  browserType: browserTypeEnum;
+  browserType: BrowserTypeEnum;
   timeout?: number;
   proxyServer: string;
   browserArgs?: Array<string>;
@@ -25,8 +25,8 @@ export class Args {
     args.url = req.url;
     const parsedURL = url.parse(args.url);
     const bt = parsedURL.pathname.split('/')[1].toLowerCase();
-    if (bt in browserTypeEnum) {
-      args.browserType = bt as browserTypeEnum;
+    if (bt in BrowserTypeEnum) {
+      args.browserType = bt as BrowserTypeEnum;
     } else {
       throw `Unknown Browser type: ${bt}`;
     }
@@ -35,7 +35,7 @@ export class Args {
       // timeout 以分钟为单位
       args.timeout = Number(args.query['timeout']);
     }
-    args.proxyServer = args.query['proxyServer'] ? args.query['proxyServer'] : 'http://127.0.0.1:8080';
+    args.proxyServer = args.query['proxyServer'] ? args.query['proxyServer'] : null;
     return args;
   }
 };

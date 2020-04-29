@@ -112,18 +112,10 @@ RUN mkdir /app
 
 WORKDIR /app
 
-COPY ./package.json /app
+COPY . /app
 
 RUN npm install && \
     npm install -g ts-node typescript
-
-COPY ./src /app/src
-
-COPY ./extensions /app/extensions
-
-COPY ./start.sh /app
-
-COPY ./init.sh /app
 
 RUN chown -R pwuser:pwuser /app
 

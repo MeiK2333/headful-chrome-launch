@@ -1,159 +1,122 @@
-import * as fs from 'fs-extra';
-import * as os from 'os';
-import * as path from 'path';
-import * as url from 'url';
-import * as playwright from 'playwright';
-import { Args } from './args';
-import * as extensions from './extensions';
+import axios from 'axios';
+import Cookies from 'cookies';
+import fs from 'fs-extra';
+import http from 'http';
+import httpProxy from 'http-proxy';
+import url from 'url';
+import querystring from 'querystring';
 
-var http = require('http');
-var httpProxy = require('http-proxy');
+import { Args, BrowserTypeEnum } from './args';
+import { LaunchBrowser } from './browser';
+import { logger } from './logger';
 
-// 启动代理服务
-require('./proxy');
+const runningBrowser: Array<LaunchBrowser> = [];
 
-function promisify(nodeFunction: Function): Function {
-  function promisified(...args: any[]) {
-    return new Promise((resolve, reject) => {
-      function callback(err: any, ...result: any[]) {
-        if (err)
-          return reject(err);
-        if (result.length === 1)
-          return resolve(result[0]);
-        return resolve(result);
-      }
-      nodeFunction.call(null, ...args, callback);
-    });
-  }
-  return promisified;
-}
-
-const mkdtempAsync = promisify(fs.mkdtemp);
-const writeFileAsync = promisify(fs.writeFile);
-
-var proxy = new httpProxy.createProxyServer();
-var proxyServer = http.createServer(function (req, res) {
-  res.write('Hello World!');
-  res.end();
+const httpProxyServer = httpProxy.createProxyServer();
+httpProxyServer.on('error', (err) => {
+  logger.info(err.message);
+  console.error(err);
 });
 
-proxyServer.on('upgrade', async (req, socket, head) => {
-  try {
-    const args = Args.parseFromReq(req);
-    var browser: playwright.BrowserServer;
-    let userDataDir: string = null;
+const httpServer = http.createServer(async (req, res) => {
+  let host = req.headers.host;
 
-    switch (args.browserType) {
-      case 'chrome':
-        browser = await playwright.chromium.launchServer({
-          executablePath: '/usr/bin/google-chrome',
-          headless: false,
-          args: [
-            '--disable-dev-shm-usage',
-            '--disable-setuid-sandbox',
-            '--no-sandbox',
-            `--proxy-server=${args.proxyServer}`,
-            '--no-first-run',
-            '--no-default-browser-check'
-          ]
-        });
-        break;
-      case 'chromium':
-        userDataDir = await mkdtempAsync(path.join(os.tmpdir(), 'playwright_dev_chromium_profile-'));
-        await fs.copy('./extensions/chromium/defaultChromium', userDataDir);
-        //@ts-ignore
-        browser = (await playwright.chromium._launchServer({
-          headless: false,
-          args: [
-            '--disable-dev-shm-usage',
-            '--disable-setuid-sandbox',
-            '--no-sandbox',
-            `--proxy-server=${args.proxyServer}`,
-            '--no-first-run',
-            '--no-default-browser-check',
-            '--lang=zh-CN',
-            `--disable-extensions-except=${Object.values(extensions.extensions).join(',')}`,
-            `--load-extensions=${Object.values(extensions.extensions).join(',')}`
-          ],
-          env: {
-            ...process.env,
-            LANGUAGE: 'zh-CN'
-          }
-        }, 'server', userDataDir)).browserServer;
-        break;
-      case 'firefox':
-        // 将代理配置写入 Firefox 的配置文件中，并以此配置文件启动
-        const proxyServerUrl = url.parse(args.proxyServer);
-        const firefoxUserJs = `
-user_pref("security.cert_pinning.enforcement_level", 0);
-user_pref("security.tls.version.min", 1);
-user_pref("network.stricttransportsecurity.preloadlist", false);
-user_pref("network.proxy.type", 1);
-user_pref("network.proxy.share_proxy_settings", true);
-user_pref("network.proxy.http", "${proxyServerUrl.hostname}");
-user_pref("network.proxy.http_port", ${proxyServerUrl.port});
-user_pref("network.proxy.ssl", "${proxyServerUrl.hostname}");
-user_pref("network.proxy.ssl_port", ${proxyServerUrl.port});
-      `;
-        userDataDir = await mkdtempAsync(path.join(os.tmpdir(), 'playwright_dev_firefox_profile-'));
-        await writeFileAsync(path.join(userDataDir, "./user.js"), firefoxUserJs);
-        //@ts-ignore
-        browser = await playwright.firefox._launchServer({
-          headless: false
-        }, 'server', userDataDir);
-        break;
-      case 'webkit':
-        browser = await playwright.webkit.launchServer({
-          headless: false,
-          env: {
-            ...process.env,
-            http_proxy: args.proxyServer,
-            https_proxy: args.proxyServer,
-            ftp_proxy: args.proxyServer,
-            all_proxy: args.proxyServer
-          }
-        });
-        break;
-      default:
-        console.log(`Unknown browser: ${args.browserType}`);
-        socket.end();
-        return;
-    }
+  const parsedURL = url.parse(req.url);
+  const query = querystring.parse(parsedURL.query);
 
-    var timer: NodeJS.Timeout;
-    if (args.timeout) {
-      timer = setTimeout(async () => {
-        await closeBrowser();
-        console.log(`Timeout! ${args.browserType}: ${browser.wsEndpoint()} closed`);
-      }, args.timeout * 1000 * 60);
-    }
-    const closeBrowser = async () => {
-      clearTimeout(timer);
-      await browser.close();
-      // 如果创建了临时文件夹，则应该在浏览器关闭时删除
-      if (userDataDir) {
-        await fs.promises.rmdir(userDataDir, { recursive: true });
+  if (req.url === '/') {
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    const data = await fs.promises.readFile('./src/inspector.html');
+    res.end(data);
+  } else if (req.url.startsWith('/json')) {
+    res.setHeader('Content-Type', 'application/json; charset=UTF-8');
+    if (req.url.startsWith('/json?')) {
+      const proxyUrl = query['proxyUrl'];
+      const resp = await axios.get(`${proxyUrl}/json`);
+      for (const item of resp.data) {
+        item.devtoolsFrontendUrl = item.devtoolsFrontendUrl.replace('ws=', `proxyUrl=${proxyUrl}&ws=${host}/devtools?ws://`);
+        item.webSocketDebuggerUrl = `ws://${host}/devtools?` + item.webSocketDebuggerUrl
       }
-      socket.end();
+      res.end(JSON.stringify(resp.data, null, 2));
+    } else if (req.url.startsWith('/json/version')) {
+      const proxyUrl = query['proxyUrl'];
+      const resp = await axios.get(`${proxyUrl}/json/version`);
+      res.end(JSON.stringify(resp.data, null, 2));
+    } else if (req.url === '/json/browsers') {
+      const data = [];
+      for (const item of runningBrowser) {
+        data.push({
+          type: item.browserType,
+          wsEndpoint: item.browserServer.wsEndpoint(),
+          userDataDir: item.userDataDir
+        })
+      }
+      res.end(JSON.stringify(data, null, 2));
+    } else {
+      res.end('Hello World!');
     }
+  } else if (req.url.startsWith('/devtools')) {
+    // 因为传递的问题，此处很难直接以 Url 参数的方式传递代理目标
+    // 只能通过设置 Cookies 来实现
+    const cookies = new Cookies(req, res);
+    const proxyUrl = cookies.get('proxyUrl');
+    httpProxyServer.web(req, res, {
+      target: proxyUrl
+    });
+  } else {
+    res.end('Hello World!');
+  }
+});
 
-    console.log(`${args.browserType}: ${browser.wsEndpoint()}`);
-    socket.on('close', async () => {
-      await closeBrowser();
-      console.log(`${args.browserType}: ${browser.wsEndpoint()} closed`);
-    });
-    socket.on('error', async () => {
-      await closeBrowser();
-      console.log(`${args.browserType}: ${browser.wsEndpoint()} error`);
-    });
-    proxy.ws(req, socket, head, {
-      target: browser.wsEndpoint(),
+httpServer.on('upgrade', async (req, socket, head) => {
+  // 页面调试，仅转发 ws，不需要启动新的浏览器
+  if (req.url.startsWith('/devtools')) {
+    const parsedURL = url.parse(req.url);
+    httpProxyServer.ws(req, socket, head, {
+      target: parsedURL.query,
       ignorePath: true
     });
-  } catch (err) {
-    console.error(err);
+    return;
+  }
+
+  const args = Args.parseFromReq(req);
+  const launchBrowser = await LaunchBrowser.create(args);
+  const browser = launchBrowser.browserServer;
+  const wsEndpoint = browser.wsEndpoint();
+
+  if ([BrowserTypeEnum.chrome, BrowserTypeEnum.chromium].includes(launchBrowser.browserType)) {
+    runningBrowser.push(launchBrowser);
+  }
+
+  logger.info(`${args.browserType}: ${wsEndpoint}`);
+  const clean = async () => {
+    const index = runningBrowser.indexOf(launchBrowser);
+    if (index !== -1) {
+      runningBrowser.splice(index, 1);
+    }
+    await launchBrowser.clean();
     socket.end();
   }
+  socket.on('close', async () => {
+    await clean();
+    logger.info(`${args.browserType}: ${wsEndpoint} closed`);
+  });
+  socket.on('error', async () => {
+    await clean();
+    logger.info(`${args.browserType}: ${wsEndpoint} error`);
+  });
+
+  httpProxyServer.ws(req, socket, head, {
+    target: wsEndpoint,
+    ignorePath: true
+  });
 });
 
-proxyServer.listen(5678);
+httpServer.listen(5678, () => {
+  logger.info('server running on http://127.0.0.1:5678/');
+});
+
+httpServer.on('error', (err) => {
+  logger.error(`${err.message}`);
+  console.error(err);
+});

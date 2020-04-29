@@ -1,5 +1,5 @@
-import * as playwright from 'playwright';
-import * as fs from 'fs-extra';
+import playwright from 'playwright';
+import fs from 'fs-extra';
 import * as extensions from './extensions';
 
 (async () => {
