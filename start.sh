@@ -15,8 +15,16 @@ xvfb=$!
 
 export DISPLAY=:1
 
-/usr/bin/dumb-init -- ts-node src/app.ts $@ &
+fvwm&
+fm=$!
+
+x11vnc&
+vnc=$!
+
+/usr/bin/dumb-init -- ts-node src/index.ts $@ &
 node=$!
 
 wait $node
 wait $xvfb
+wait $fm
+wait $vnc
