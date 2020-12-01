@@ -1,21 +1,21 @@
 {
-    "compilerOptions": {
-        "moduleResolution": "node",
-        "target": "es6",
-        "module": "commonjs",
-        "lib": [
-            "esnext"
-        ],
-        "esModuleInterop": true,
-        "allowSyntheticDefaultImports": true,
-        "typeRoots": [
-            "node_modules/@types"
-        ]
-    },
-    "include": [
-        "src/**/*.ts"
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "target": "es6",
+    "module": "commonjs",
+    "lib": [
+      "esnext"
     ],
-    "exclude": [
-        "node_modules"
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "typeRoots": [
+      "node_modules/@types"
     ]
+  },
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }
