@@ -21,7 +21,7 @@
     "@types/http-proxy": "^1.17.4",
     "@types/puppeteer": "^5.4.0",
     "http-proxy": "^1.18.1",
-    "moment": "^2.29.1",
+    "moment": "^2.29.2",
     "playwright": "^1.6.2",
     "puppeteer": "^5.5.0",
     "winston": "^3.3.3"
